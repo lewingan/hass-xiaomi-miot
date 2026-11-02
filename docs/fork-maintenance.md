@@ -19,8 +19,8 @@ Tracking this fork therefore makes future downloads retain the patch.
 
 ## Incorporating upstream changes
 
-The **Sync upstream** GitHub Actions workflow runs daily at **03:17 Singapore
-time** (19:17 UTC), subject to GitHub scheduling delays. It can also be started
+The **Sync upstream** GitHub Actions workflow runs every **Monday at 03:17 Singapore
+time** (Sunday 19:17 UTC), subject to GitHub scheduling delays. It can also be started
 from the Actions tab using **Run workflow** on `main`.
 
 It prepares a normal merge from upstream `master`, then tests the exact candidate
