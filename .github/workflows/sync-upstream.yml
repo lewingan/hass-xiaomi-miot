@@ -1,0 +1,251 @@
+name: Sync upstream
+
+on:
+  schedule:
+    # 03:17 Asia/Singapore; avoid the busy start of the hour.
+    - cron: "17 19 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fork-upstream-sync
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    if: github.repository == 'lewingan/hass-xiaomi-miot' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      base: ${{ steps.merge.outputs.base }}
+      candidate: ${{ steps.merge.outputs.candidate }}
+      upstream: ${{ steps.merge.outputs.upstream }}
+      changed: ${{ steps.merge.outputs.changed }}
+      bundle_sha256: ${{ steps.merge.outputs.bundle_sha256 }}
+      artifact_id: ${{ steps.bundle.outputs.artifact-id }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Prepare merge without changing the fork
+        id: merge
+        env:
+          UPSTREAM_URL: https://github.com/al-one/hass-xiaomi-miot.git
+        shell: bash
+        run: |
+          set -euo pipefail
+          base=$(git rev-parse HEAD)
+          git fetch --no-tags "$UPSTREAM_URL" master
+          upstream=$(git rev-parse FETCH_HEAD)
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if ! git merge --no-ff --no-edit "$upstream"; then
+            echo '::error::Upstream merge conflicts require manual resolution. Fork main is unchanged.'
+            exit 1
+          fi
+          if ! git diff --quiet "$base" HEAD -- .github/workflows; then
+            echo '::error::Upstream changes workflow files. Review and merge these manually before resuming automatic sync.'
+            exit 1
+          fi
+          candidate=$(git rev-parse HEAD)
+          changed=false
+          if [ "$candidate" != "$base" ]; then changed=true; fi
+          git bundle create "$RUNNER_TEMP/candidate.bundle" HEAD
+          bundle_sha256=$(sha256sum "$RUNNER_TEMP/candidate.bundle" | cut -d ' ' -f 1)
+          {
+            echo "base=$base"
+            echo "candidate=$candidate"
+            echo "upstream=$upstream"
+            echo "changed=$changed"
+            echo "bundle_sha256=$bundle_sha256"
+          } >> "$GITHUB_OUTPUT"
+          {
+            echo "Upstream: $upstream"
+            echo "Candidate: $candidate"
+            echo "New upstream commits: $changed"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        id: bundle
+        if: steps.merge.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
+        with:
+          name: upstream-candidate
+          path: ${{ runner.temp }}/candidate.bundle
+          retention-days: 7
+          if-no-files-found: error
+
+  validate:
+    needs: prepare
+    if: needs.prepare.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.base }}
+          persist-credentials: false
+
+      - uses: actions/download-artifact@v4
+        with:
+          artifact-ids: ${{ needs.prepare.outputs.artifact_id }}
+          path: ${{ runner.temp }}/candidate
+          merge-multiple: true
+
+      - name: Load the exact candidate
+        env:
+          BUNDLE_SHA256: ${{ needs.prepare.outputs.bundle_sha256 }}
+          CANDIDATE: ${{ needs.prepare.outputs.candidate }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "$BUNDLE_SHA256  $RUNNER_TEMP/candidate/candidate.bundle" | sha256sum -c -
+          git fetch "$RUNNER_TEMP/candidate/candidate.bundle" HEAD
+          test "$(git rev-parse FETCH_HEAD)" = "$CANDIDATE"
+          git checkout --detach "$CANDIDATE"
+
+      - name: Retain the purifier regression coverage and HACS settings
+        run: |
+          test -s tests/test_xiaomi_airp_va6.py
+          test -s tests/test_miot_enum_descriptions.py
+          test -s tests/fixtures/xiaomi.airp.va6.json
+          test -s tests/fixtures/xiaomi.airp.va6-v1.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          hacs = json.loads(Path('hacs.json').read_text())
+          manifest = json.loads(Path('custom_components/xiaomi_miot/manifest.json').read_text())
+          assert manifest['domain'] == 'xiaomi_miot'
+          assert hacs['zip_release'] is False
+          assert hacs['hide_default_branch'] is False
+          assert hacs['content_in_root'] is False
+          PY
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Test with current Home Assistant
+        run: |
+          python -m pip install -r requirements_test.txt
+          python -c "from importlib.metadata import version; print('Home Assistant:', version('homeassistant'))"
+          python -m pytest -q
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Test with minimum Home Assistant
+        run: |
+          python -m pip install -r requirements_test_min.txt
+          python -c "from importlib.metadata import version; assert version('homeassistant') == '2025.6.0'"
+          python -m pytest -q
+
+      - name: Hassfest validation
+        uses: home-assistant/actions/hassfest@master
+
+      # This action reads the published repository, not the candidate checkout.
+      # Candidate HACS settings are checked locally above.
+      - name: Check published fork's HACS eligibility
+        uses: hacs/action@main
+        with:
+          category: integration
+          ignore: hacs
+
+  ha-config:
+    needs: prepare
+    if: needs.prepare.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        channel: [stable, "2025.6.0"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.base }}
+          persist-credentials: false
+
+      - uses: actions/download-artifact@v4
+        with:
+          artifact-ids: ${{ needs.prepare.outputs.artifact_id }}
+          path: ${{ runner.temp }}/candidate
+          merge-multiple: true
+
+      - name: Load the exact candidate
+        env:
+          BUNDLE_SHA256: ${{ needs.prepare.outputs.bundle_sha256 }}
+          CANDIDATE: ${{ needs.prepare.outputs.candidate }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "$BUNDLE_SHA256  $RUNNER_TEMP/candidate/candidate.bundle" | sha256sum -c -
+          git fetch "$RUNNER_TEMP/candidate/candidate.bundle" HEAD
+          test "$(git rev-parse FETCH_HEAD)" = "$CANDIDATE"
+          git checkout --detach "$CANDIDATE"
+
+      - name: Prepare Home Assistant configuration checks
+        run: |
+          mkdir test_configuration
+          cp -r custom_components test_configuration/
+          cat > test_configuration/configuration.yaml <<'YAML'
+          default_config:
+          xiaomi_miot:
+            language: zh
+            device_customizes:
+              brand.device.model:
+                miot_local: true
+          YAML
+
+      - name: Check Home Assistant configuration
+        uses: ludeeus/setup-homeassistant@main
+        with:
+          tag: ${{ matrix.channel }}
+          config-dir: test_configuration
+
+  publish:
+    needs: [prepare, validate, ha-config]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      # No candidate checkout, repository scripts or dependencies in this job.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.base }}
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v4
+        with:
+          artifact-ids: ${{ needs.prepare.outputs.artifact_id }}
+          path: ${{ runner.temp }}/candidate
+          merge-multiple: true
+
+      - name: Publish only the tested merge
+        id: publish
+        env:
+          BASE: ${{ needs.prepare.outputs.base }}
+          CANDIDATE: ${{ needs.prepare.outputs.candidate }}
+          UPSTREAM: ${{ needs.prepare.outputs.upstream }}
+          BUNDLE_SHA256: ${{ needs.prepare.outputs.bundle_sha256 }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "$BUNDLE_SHA256  $RUNNER_TEMP/candidate/candidate.bundle" | sha256sum -c -
+          git fetch "$RUNNER_TEMP/candidate/candidate.bundle" HEAD
+          test "$(git rev-parse FETCH_HEAD)" = "$CANDIDATE"
+          git merge-base --is-ancestor "$BASE" "$CANDIDATE"
+          git merge-base --is-ancestor "$UPSTREAM" "$CANDIDATE"
+          git diff --exit-code "$BASE" "$CANDIDATE" -- .github/workflows
+          git fetch origin main
+          if [ "$(git rev-parse FETCH_HEAD)" != "$BASE" ]; then
+            echo '::error::Fork main changed during validation. Run sync again to build a fresh candidate.'
+            exit 1
+          fi
+          git push origin "$CANDIDATE:refs/heads/main"
+          echo "Fork main is at tested commit $CANDIDATE. HA installation and restart remain manual." >> "$GITHUB_STEP_SUMMARY"
