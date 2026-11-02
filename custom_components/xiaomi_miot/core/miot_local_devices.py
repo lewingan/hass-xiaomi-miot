@@ -861,6 +861,7 @@ MIOT_LOCAL_MODELS = [
     'xiaomi.airp.va2b',
     'xiaomi.airp.va3',
     'xiaomi.airp.va4',
+    'xiaomi.airp.va6',
     'xiaomi.bhf_light.na1',
     'xiaomi.bhf_light.s1',
     'xiaomi.bhf_light.v1',

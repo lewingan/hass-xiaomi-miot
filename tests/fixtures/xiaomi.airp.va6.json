@@ -1,0 +1,160 @@
+{
+  "type": "urn:miot-spec-v2:device:air-purifier:0000A007:xiaomi-va6:2:0000D050",
+  "description": "xiaomi airp va6",
+  "services": [
+    {
+      "iid": 1,
+      "type": "urn:miot-spec-v2:service:device-information:00007801:xiaomi-va6:1:0000D050",
+      "description": "Device Information",
+      "properties": [
+        {"iid": 1, "type": "urn:miot-spec-v2:property:manufacturer:00000001:xiaomi-va6:1:0000D050", "description": "Device Manufacturer", "format": "string", "access": ["read"], "source": 4},
+        {"iid": 2, "type": "urn:miot-spec-v2:property:model:00000002:xiaomi-va6:1:0000D050", "description": "Device Model", "format": "string", "access": ["read"], "source": 4},
+        {"iid": 3, "type": "urn:miot-spec-v2:property:serial-number:00000003:xiaomi-va6:1:0000D050", "description": "Device ID", "format": "string", "access": ["read"], "source": 4},
+        {"iid": 4, "type": "urn:miot-spec-v2:property:firmware-revision:00000005:xiaomi-va6:1:0000D050", "description": "Current Firmware Version", "format": "string", "access": ["read"], "source": 4},
+        {"iid": 5, "type": "urn:miot-spec-v2:property:serial-no:000000FF:xiaomi-va6:1:0000D050", "description": "Serial Number", "format": "string", "access": ["read", "notify"], "source": 4}
+      ]
+    },
+    {
+      "iid": 2,
+      "type": "urn:miot-spec-v2:service:air-purifier:00007811:xiaomi-va6:1:0000D050",
+      "description": "Air-purifier",
+      "properties": [
+        {"iid": 1, "type": "urn:miot-spec-v2:property:on:00000006:xiaomi-va6:1:0000D050", "description": "Switch Status", "format": "bool", "access": ["read", "write", "notify"], "source": 1},
+        {"iid": 2, "type": "urn:miot-spec-v2:property:fault:00000009:xiaomi-va6:1:0000D050", "description": "Device Fault", "format": "uint8", "access": ["read", "notify"], "value-list": [{"value": 0, "description": "No Faults"}, {"value": 1, "description": "PM Error"}, {"value": 2, "description": "Temp-Hum Error"}, {"value": 3, "description": "HCHO Error"}, {"value": 5, "description": "Motor Stuck"}], "source": 1, "gatt-access": []},
+        {"iid": 4, "type": "urn:miot-spec-v2:property:mode:00000008:xiaomi-va6:1:0000D050", "description": "Mode", "format": "uint8", "access": ["read", "write", "notify"], "value-list": [{"value": 0, "description": "Auto"}, {"value": 3, "description": "Sleep"}, {"value": 5, "description": "Favorite"}, {"value": 6, "description": "None"}], "source": 1, "gatt-access": []},
+        {"iid": 5, "type": "urn:miot-spec-v2:property:fan-level:00000016:xiaomi-va6:1:0000D050", "description": "Fan Level", "format": "uint8", "access": ["read", "write", "notify"], "value-list": [{"value": 0, "description": "Level1"}, {"value": 1, "description": "Level2"}, {"value": 2, "description": "Level3"}], "source": 1, "gatt-access": []},
+        {"iid": 7, "type": "urn:miot-spec-v2:property:uv:00000029:xiaomi-va6:1:0000D050", "description": "uv", "format": "bool", "access": ["read", "write", "notify"], "source": 1}
+      ],
+      "actions": [
+        {"iid": 1, "type": "urn:miot-spec-v2:action:toggle:00002811:xiaomi-va6:1:0000D050", "description": "toggle", "in": [], "out": []}
+      ]
+    },
+    {
+      "iid": 3,
+      "type": "urn:miot-spec-v2:service:environment:0000780A:xiaomi-va6:1:0000D050",
+      "description": "environment",
+      "properties": [
+        {"iid": 1, "type": "urn:miot-spec-v2:property:relative-humidity:0000000C:xiaomi-va6:1:0000D050", "description": "relative humidity", "format": "uint8", "access": ["read", "notify"], "unit": "percentage", "value-range": [0, 100, 1], "source": 1},
+        {"iid": 7, "type": "urn:miot-spec-v2:property:temperature:00000020:xiaomi-va6:1:0000D050", "description": "temperature", "format": "float", "access": ["read", "notify"], "unit": "celsius", "value-range": [-30, 100, 0.1], "source": 1},
+        {"iid": 3, "type": "urn:miot-spec-v2:property:air-quality:0000001C:xiaomi-va6:1:0000D050", "description": "air quality", "format": "uint8", "access": ["read", "notify"], "value-list": [{"value": 0, "description": "Excellent"}, {"value": 1, "description": "Good"}, {"value": 2, "description": "Moderate"}, {"value": 3, "description": "Poor"}, {"value": 4, "description": "Heavy Pollution"}, {"value": 5, "description": "Hazardous"}], "source": 1, "gatt-access": []},
+        {"iid": 4, "type": "urn:miot-spec-v2:property:pm2.5-density:00000034:xiaomi-va6:1:0000D050", "description": "PM2.5 Density", "format": "uint16", "access": ["read", "notify"], "unit": "μg/m3", "value-range": [0, 1000, 1], "source": 1, "gatt-access": []},
+        {"iid": 5, "type": "urn:miot-spec-v2:property:pm10-density:00000035:xiaomi-va6:1:0000D050", "description": "PM10 Density", "format": "uint16", "access": ["read", "notify"], "value-range": [0, 100, 1], "source": 1},
+        {"iid": 11, "type": "urn:miot-spec-v2:property:hcho-density:000000B0:xiaomi-va6:1:0000D050", "description": "hcho density", "format": "float", "access": ["read", "notify"], "unit": "mg/m3", "value-range": [0, 1, 0.001], "source": 1},
+        {"iid": 9, "type": "urn:miot-spec-v2:property:pm1:000003B9:xiaomi-va6:1", "description": "PM1", "format": "uint16", "access": ["read", "notify"], "unit": "μg/m3", "value-range": [0, 1000, 1]}
+      ]
+    },
+    {
+      "iid": 4,
+      "type": "urn:miot-spec-v2:service:filter:0000780B:xiaomi-va6:1:0000D050",
+      "description": "filter",
+      "properties": [
+        {"iid": 1, "type": "urn:miot-spec-v2:property:filter-life-level:0000001E:xiaomi-va6:1:0000D050", "description": "filter life level", "format": "uint8", "access": ["read", "notify"], "unit": "percentage", "value-range": [0, 100, 1], "source": 1},
+        {"iid": 2, "type": "urn:miot-spec-v2:property:filter-left-time:0000001F:xiaomi-va6:1", "description": "Filter Left Time", "format": "uint16", "access": ["read", "notify"], "unit": "hours", "value-range": [0, 10000, 1], "gatt-access": []},
+        {"iid": 3, "type": "urn:miot-spec-v2:property:filter-used-time:00000048:xiaomi-va6:1", "description": "Filter Used Time", "format": "uint16", "access": ["read", "notify"], "unit": "hours", "value-range": [0, 10000, 1]},
+        {"iid": 4, "type": "urn:miot-spec-v2:property:filter-left-time:0000001F:xiaomi-va6:2", "description": "Filter Left Time", "format": "uint16", "access": ["read", "notify"], "unit": "hours", "value-range": [0, 60000, 1], "gatt-access": []},
+        {"iid": 5, "type": "urn:miot-spec-v2:property:filter-used-time:00000048:xiaomi-va6:2", "description": "Filter Used Time", "format": "uint16", "access": ["read", "notify"], "unit": "hours", "value-range": [0, 60000, 1], "gatt-access": []}
+      ],
+      "actions": [
+        {"iid": 1, "type": "urn:miot-spec-v2:action:reset-filter-life:00002803:xiaomi-va6:1:0000D050", "description": "reset filter life", "in": [], "out": []}
+      ]
+    },
+    {
+      "iid": 7,
+      "type": "urn:miot-spec-v2:service:screen:00007806:xiaomi-va6:1:0000D050",
+      "description": "screen",
+      "properties": [
+        {"iid": 1, "type": "urn:miot-spec-v2:property:on:00000006:xiaomi-va6:1:0000D050", "description": "switch status", "format": "bool", "access": ["read", "write", "notify"], "source": 1},
+        {"iid": 2, "type": "urn:miot-spec-v2:property:brightness:0000000D:xiaomi-va6:1:0000D050", "description": "brightness", "format": "uint8", "access": ["read", "write", "notify"], "value-list": [{"value": 0, "description": "Dim"}, {"value": 1, "description": "Normal"}, {"value": 2, "description": "Mid"}], "source": 1, "gatt-access": []}
+      ]
+    },
+    {
+      "iid": 6,
+      "type": "urn:miot-spec-v2:service:alarm:00007804:xiaomi-va6:1:0000D050",
+      "description": "alarm",
+      "properties": [
+        {"iid": 1, "type": "urn:miot-spec-v2:property:alarm:00000012:xiaomi-va6:1:0000D050", "description": "alarm", "format": "bool", "access": ["read", "write", "notify"], "source": 1}
+      ]
+    },
+    {
+      "iid": 8,
+      "type": "urn:miot-spec-v2:service:physical-controls-locked:00007807:xiaomi-va6:1:0000D050",
+      "description": "physical controls locked",
+      "properties": [
+        {"iid": 1, "type": "urn:miot-spec-v2:property:physical-controls-locked:0000001D:xiaomi-va6:1:0000D050", "description": "physical controls locked", "format": "bool", "access": ["read", "write", "notify"], "source": 1}
+      ],
+      "events": [
+        {"iid": 1, "type": "urn:miot-spec-v2:event:child-lock-trigger:0000509D:xiaomi-va6:1:0000D050", "description": "child-lock-trigger", "arguments": []}
+      ]
+    },
+    {
+      "iid": 9,
+      "type": "urn:miot-spec-v2:service:air-purifier-favorite:000078B2:xiaomi-va6:1:0000D050",
+      "description": "air purifier favirote",
+      "properties": [
+        {"iid": 1, "type": "urn:miot-spec-v2:property:fan-level:00000016:xiaomi-va6:1:0000D050", "description": "fan level", "format": "uint8", "access": ["read", "write", "notify"], "value-list": [{"value": 0, "description": "0"}, {"value": 1, "description": "0"}, {"value": 2, "description": "2"}, {"value": 3, "description": "3"}, {"value": 4, "description": "4"}, {"value": 5, "description": "5"}, {"value": 6, "description": "6"}, {"value": 7, "description": "7"}, {"value": 8, "description": "8"}, {"value": 9, "description": "9"}, {"value": 10, "description": "10"}], "source": 1, "gatt-access": []}
+      ]
+    },
+    {
+      "iid": 14,
+      "type": "urn:miot-spec-v2:service:self-check:000078D7:xiaomi-va6:1",
+      "description": "Self Check",
+      "properties": [
+        {"iid": 1, "type": "urn:miot-spec-v2:property:self-check-items:0000020D:xiaomi-va6:1", "description": "Self Check Items", "format": "uint8", "access": [], "value-list": [{"value": 0, "description": "All"}, {"value": 1, "description": "Motor"}, {"value": 2, "description": "HCHO-Sensor"}, {"value": 3, "description": "Particle-Sensor"}, {"value": 4, "description": "TH-Sensor"}, {"value": 5, "description": "Door-Hall"}, {"value": 6, "description": "Key-Power"}, {"value": 7, "description": "Key-Mode"}, {"value": 8, "description": "Key-Info"}, {"value": 9, "description": "Key-Led"}], "gatt-access": []},
+        {"iid": 2, "type": "urn:miot-spec-v2:property:self-check-results:0000020E:xiaomi-va6:1", "description": "Self Check Results", "format": "string", "access": ["read", "notify"]},
+        {"iid": 3, "type": "urn:miot-spec-v2:property:manual-check-results:000002A3:xiaomi-va6:1", "description": "Manual Check Results", "format": "uint8", "access": ["read", "write", "notify"], "value-list": [{"value": 0, "description": "Normal"}, {"value": 1, "description": "Abnormal"}, {"value": 2, "description": "Ignore"}], "gatt-access": []}
+      ],
+      "actions": [
+        {"iid": 1, "type": "urn:miot-spec-v2:action:start-check:00002891:xiaomi-va6:1", "description": "Start Check", "in": [1], "out": []},
+        {"iid": 2, "type": "urn:miot-spec-v2:action:stop-check:0000289E:xiaomi-va6:1", "description": "Stop Check", "in": [], "out": []},
+        {"iid": 3, "type": "urn:miot-spec-v2:action:sync-manual-check:000028B9:xiaomi-va6:1", "description": "Sync Manual Check", "in": [1, 3], "out": []}
+      ],
+      "events": [
+        {"iid": 1, "type": "urn:miot-spec-v2:event:self-check-complete:00005079:xiaomi-va6:1", "description": "Self Check Complete", "arguments": []}
+      ]
+    },
+    {
+      "iid": 10,
+      "type": "urn:xiaomi-spec:service:filter-debug:00007801:xiaomi-va6:1",
+      "description": "filter-debug",
+      "properties": [
+        {"iid": 1, "type": "urn:xiaomi-spec:property:filter-used-time:00000001:xiaomi-va6:1", "description": "", "format": "uint16", "access": ["write"], "unit": "hours", "value-range": [0, 10000, 1]},
+        {"iid": 2, "type": "urn:xiaomi-spec:property:filter-used-life:00000002:xiaomi-va6:1", "description": "", "format": "uint8", "access": ["write"], "unit": "percentage", "value-range": [0, 100, 1]},
+        {"iid": 3, "type": "urn:xiaomi-spec:property:filter-used-time:00000003:xiaomi-va6:2", "description": "", "format": "uint16", "access": ["write"], "unit": "hours", "value-range": [0, 60000, 1]}
+      ]
+    },
+    {
+      "iid": 12,
+      "type": "urn:xiaomi-spec:service:aqi:00007802:xiaomi-va6:1",
+      "description": "aqi",
+      "properties": [
+        {"iid": 1, "type": "urn:xiaomi-spec:property:update-heartbeat:00000001:xiaomi-va6:1", "description": "", "format": "uint16", "access": ["read", "notify", "write"], "value-range": [0, 65535, 1]}
+      ]
+    },
+    {
+      "iid": 13,
+      "type": "urn:xiaomi-spec:service:custom-service:00007803:xiaomi-va6:1",
+      "description": "custom-service",
+      "properties": [
+        {"iid": 1, "type": "urn:xiaomi-spec:property:favorite-square:00000001:xiaomi-va6:1", "description": "", "format": "string", "access": ["read", "notify"]},
+        {"iid": 2, "type": "urn:xiaomi-spec:property:reboot-cause:00000002:xiaomi-va6:1", "description": "", "format": "uint8", "access": ["read", "notify"], "value-list": [{"value": 1, "description": "Power"}, {"value": 2, "description": "External-pin"}, {"value": 3, "description": "Software"}, {"value": 4, "description": "IWDG"}, {"value": 5, "description": "Unknown"}]},
+        {"iid": 3, "type": "urn:xiaomi-spec:property:motor-rpm-set:00000003:xiaomi-va6:1", "description": "", "format": "uint16", "access": ["read", "notify"], "value-range": [0, 10000, 1]},
+        {"iid": 4, "type": "urn:xiaomi-spec:property:motor-rpm-feedback:00000004:xiaomi-va6:1", "description": "", "format": "uint16", "access": ["read", "notify"], "value-range": [0, 10000, 1]},
+        {"iid": 5, "type": "urn:xiaomi-spec:property:hcho-tag:00000005:xiaomi-va6:1", "description": "", "format": "string", "access": ["read", "notify"]},
+        {"iid": 6, "type": "urn:xiaomi-spec:property:iic-error-cnt:00000006:xiaomi-va6:1", "description": "", "format": "uint16", "access": ["read", "notify"], "value-range": [0, 65535, 1]},
+        {"iid": 7, "type": "urn:xiaomi-spec:property:hcho-original:00000007:xiaomi-va6:1", "description": "", "format": "float", "access": ["read", "notify"], "unit": "mg/m3", "value-range": [0, 10, 0.001]},
+        {"iid": 10, "type": "urn:xiaomi-spec:property:common-property:00000008:xiaomi-va6:1", "description": "", "format": "string", "access": ["read", "notify"]},
+        {"iid": 11, "type": "urn:xiaomi-spec:property:motor-rpm-debug:00000009:xiaomi-va6:1", "description": "", "format": "uint16", "access": ["write"], "value-range": [0, 10000, 1]},
+        {"iid": 12, "type": "urn:xiaomi-spec:property:particle-abnormal-on:0000000a:xiaomi-va6:1", "description": "", "format": "bool", "access": ["read", "notify", "write"]}
+      ],
+      "actions": [
+        {"iid": 1, "type": "urn:xiaomi-spec:action:toggle-mode:00002801:xiaomi-va6:1", "description": "toggle-mode", "in": [], "out": []},
+        {"iid": 2, "type": "urn:xiaomi-spec:action:toggle-fan-level:00002802:xiaomi-va6:1", "description": "toggle-fan-level", "in": [], "out": []}
+      ],
+      "events": [
+        {"iid": 1, "type": "urn:xiaomi-spec:event:door-opened:00005001:xiaomi-va6:1", "description": "door-opened", "arguments": []},
+        {"iid": 2, "type": "urn:xiaomi-spec:event:filter-exhausted:00005002:xiaomi-va6:1", "description": "filter-exhausted", "arguments": []},
+        {"iid": 3, "type": "urn:xiaomi-spec:event:particle-abnormal:00005003:xiaomi-va6:1", "description": "particle-abnormal", "arguments": []}
+      ]
+    }
+  ]
+}

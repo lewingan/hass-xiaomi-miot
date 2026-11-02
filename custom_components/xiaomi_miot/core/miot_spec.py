@@ -806,6 +806,13 @@ class MiotProperty(MiotSpecInstance):
             except (TypeError, ValueError):
                 val = None
             return val
+        if des is not None:
+            for lower in [False, True]:
+                descriptions, prefixed = self._enum_descriptions(lower=lower)
+                if prefixed:
+                    for v, label in zip(self.value_list, descriptions):
+                        if des == label:
+                            return v.get('value')
         rls = []
         for v in self.value_list:
             val = v.get('value')
@@ -816,13 +823,25 @@ class MiotProperty(MiotSpecInstance):
                 return val
         return rls if des is None else None
 
+    def _enum_descriptions(self, lower=False):
+        descriptions = [
+            str(self.get_translation(v.get('description'), viid=v.get('value')))
+            for v in self.value_list
+        ]
+        if lower:
+            descriptions = [des.lower() for des in descriptions]
+        options = [des or str(v.get('value')) for v, des in zip(self.value_list, descriptions)]
+        if len(set(options)) < len(options):
+            # Native values keep every option selectable when spec labels collide.
+            descriptions = [f"{v.get('value')}: {des}" for v, des in zip(self.value_list, options)]
+            return descriptions, True
+        return descriptions, False
+
     def list_description(self, val, lower=False):
         rls = []
-        for v in self.value_list:
+        descriptions, _ = self._enum_descriptions(lower=lower)
+        for v, des in zip(self.value_list, descriptions):
             vid = v.get('value')
-            des = str(self.get_translation(v.get('description'), viid=vid))
-            if lower:
-                des = des.lower()
             if val is None:
                 if des == '':
                     des = str(vid)

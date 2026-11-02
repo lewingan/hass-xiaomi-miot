@@ -2233,6 +2233,32 @@ DEVICE_CUSTOMIZES = {
         'button_actions': 'toggle,reset_filter_life',
         'exclude_miot_services': 'custom_service,filter_debug,filter_tag',
     },
+    'xiaomi.airp.va6': {
+        'sensor_properties': 'fault,pm1,favorite_square,motor_rpm_set,motor_rpm_feedback',
+        'switch_properties': 'screen.on,particle_abnormal_on',
+        'select_properties': 'air_purifier_favorite.fan_level,brightness',
+        'button_actions': 'reset_filter_life',
+        'exclude_miot_services': 'filter_debug,aqi,self_check',
+        'exclude_miot_properties': 'reboot_cause,hcho_tag,iic_error_cnt,hcho_original,common_property,motor_rpm_debug',
+        'configuration_entities': 'uv,screen.on,brightness,alarm,physical_controls_locked,particle_abnormal_on,'
+                                  'air_purifier_favorite.fan_level,reset_filter_life',
+        'diagnostic_entities': 'fault,motor_rpm_set,motor_rpm_feedback',
+        'chunk_coordinators': [
+            {'interval': 21, 'props': 'on,mode,fan_level,air_purifier_favorite.fan_level'},
+            {'interval': 61, 'props': 'fault,relative_humidity,temperature,air_quality,pm1,pm2_5_density,'
+                                    'pm10_density,hcho_density,motor_rpm_set,motor_rpm_feedback,favorite_square'},
+            {'interval': 121, 'props': 'uv,screen.on,brightness,alarm,physical_controls_locked,particle_abnormal_on'},
+            {'interval': 301, 'props': 'filter_*'},
+        ],
+    },
+    'xiaomi.airp.va6:motor_rpm_set': {
+        'unit_of_measurement': 'rpm',
+        'state_class': 'measurement',
+    },
+    'xiaomi.airp.va6:motor_rpm_feedback': {
+        'unit_of_measurement': 'rpm',
+        'state_class': 'measurement',
+    },
     'xiaomi.airp.*': {
         'exclude_miot_services': 'custom_service',
     },

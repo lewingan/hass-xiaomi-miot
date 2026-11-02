@@ -136,6 +136,10 @@ class SensorEntity(XEntity, BaseEntity, RestoreEntity):
                 self._attr_state_class = self._miot_property.state_class
             if not self._attr_native_unit_of_measurement:
                 self._attr_native_unit_of_measurement = self._miot_property.unit_of_measurement
+        # An unspecified PM10 unit does not establish a concentration unit.
+        # Preserve the raw reading without assigning density metadata.
+        if self._attr_device_class == SensorDeviceClass.PM10 and not self._attr_native_unit_of_measurement:
+            self._attr_device_class = None
 
     def get_state(self) -> dict:
         if POWER_COST_PATTERN.search(self.attr):
